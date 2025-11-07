@@ -1,0 +1,28 @@
+# R specific files
+.Rhistory
+.RData
+.Rproj.user
+*.Rproj
+
+# Mac specific
+.DS_Store
+
+# Cache directories
+.safe_purrr_cache/
+*.Rcheck/
+..Rcheck/
+
+# IDE
+.claude/
+.vscode/
+.idea/
+
+# Package build artifacts
+/*.tar.gz
+/*.tgz
+/*.pdf
+
+# Temporary files
+*~
+*.swp
+*.tmp
