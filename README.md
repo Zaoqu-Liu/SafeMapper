@@ -1,6 +1,7 @@
 # SafeMapper <img src="https://img.shields.io/badge/R-276DC3?logo=r&logoColor=white" align="right" height="25"/>
 
 <!-- badges: start -->
+[![R-CMD-check](https://github.com/Zaoqu-Liu/SafeMapper/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/Zaoqu-Liu/SafeMapper/actions/workflows/R-CMD-check.yaml)
 [![CRAN status](https://www.r-pkg.org/badges/version/SafeMapper)](https://CRAN.R-project.org/package=SafeMapper)
 [![r-universe](https://zaoqu-liu.r-universe.dev/badges/SafeMapper)](https://zaoqu-liu.r-universe.dev/SafeMapper)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
