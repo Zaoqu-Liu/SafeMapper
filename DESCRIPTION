@@ -28,5 +28,7 @@ Suggests:
     future,
     testthat (>= 3.0.0),
     knitr,
-    rmarkdown
+    rmarkdown,
+    pkgdown
+VignetteBuilder: knitr
 Config/testthat/edition: 3

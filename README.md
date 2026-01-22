@@ -180,6 +180,25 @@ s_clean_sessions(days_old = 7)
 
 ---
 
+## 📚 Tutorials
+
+Comprehensive tutorials are available to help you master SafeMapper:
+
+| Tutorial | Description | Level |
+|----------|-------------|-------|
+| [Quick Start](https://zaoqu-liu.github.io/SafeMapper/articles/quick-start.html) | Get up and running in 5 minutes | Beginner |
+| [Core Concepts](https://zaoqu-liu.github.io/SafeMapper/articles/core-concepts.html) | Understand fingerprinting, checkpointing, and recovery | Beginner |
+| [Map Functions](https://zaoqu-liu.github.io/SafeMapper/articles/map-functions.html) | Complete guide to s_map, s_map2, s_pmap, s_imap, s_walk | Intermediate |
+| [Parallel Processing](https://zaoqu-liu.github.io/SafeMapper/articles/parallel-processing.html) | Speed up with s_future_map and furrr integration | Intermediate |
+| [Error Handling](https://zaoqu-liu.github.io/SafeMapper/articles/error-handling.html) | Strategies with s_safely, s_possibly, s_quietly | Intermediate |
+| [Session Management](https://zaoqu-liu.github.io/SafeMapper/articles/session-management.html) | Configure and manage checkpoints | Intermediate |
+| [Real-World Examples](https://zaoqu-liu.github.io/SafeMapper/articles/real-world-examples.html) | API collection, file processing, ML pipelines | Advanced |
+| [Best Practices](https://zaoqu-liu.github.io/SafeMapper/articles/best-practices.html) | Production-ready patterns and anti-patterns | Advanced |
+
+📖 **Full documentation**: [https://zaoqu-liu.github.io/SafeMapper/](https://zaoqu-liu.github.io/SafeMapper/)
+
+---
+
 ## Author
 
 **Zaoqu Liu**  

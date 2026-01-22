@@ -1,0 +1,110 @@
+url: https://zaoqu-liu.github.io/SafeMapper/
+
+template:
+  bootstrap: 5
+  bootswatch: flatly
+  bslib:
+    primary: "#0d6efd"
+    border-radius: 0.5rem
+    btn-border-radius: 0.25rem
+
+home:
+  title: SafeMapper - Fault-Tolerant Functional Programming
+  description: Drop-in replacements for purrr/furrr with automatic checkpointing and recovery
+
+authors:
+  Zaoqu Liu:
+    href: https://github.com/Zaoqu-Liu
+
+navbar:
+  structure:
+    left:  [intro, reference, articles, news]
+    right: [search, github]
+  components:
+    intro:
+      text: Get Started
+      href: articles/quick-start.html
+    reference:
+      text: Reference
+      href: reference/index.html
+    articles:
+      text: Tutorials
+      menu:
+        - text: "--------"
+        - text: "Getting Started"
+        - text: "Quick Start (5 min)"
+          href: articles/quick-start.html
+        - text: "Core Concepts"
+          href: articles/core-concepts.html
+        - text: "--------"
+        - text: "Function Guide"
+        - text: "Map Functions"
+          href: articles/map-functions.html
+        - text: "Parallel Processing"
+          href: articles/parallel-processing.html
+        - text: "Error Handling"
+          href: articles/error-handling.html
+        - text: "Session Management"
+          href: articles/session-management.html
+        - text: "--------"
+        - text: "Advanced Topics"
+        - text: "Real-World Examples"
+          href: articles/real-world-examples.html
+        - text: "Best Practices"
+          href: articles/best-practices.html
+    news:
+      text: Changelog
+      href: news/index.html
+    github:
+      icon: fab fa-github fa-lg
+      href: https://github.com/Zaoqu-Liu/SafeMapper
+
+articles:
+  - title: Getting Started
+    navbar: ~
+    contents:
+      - quick-start
+      - core-concepts
+  - title: Function Guide
+    navbar: ~
+    contents:
+      - map-functions
+      - parallel-processing
+      - error-handling
+      - session-management
+  - title: Advanced Topics
+    navbar: ~
+    contents:
+      - real-world-examples
+      - best-practices
+
+reference:
+  - title: Core Map Functions
+    desc: Fault-tolerant replacements for purrr::map family
+    contents:
+      - s_map
+      - s_map2
+      - s_pmap
+      - s_imap
+      - s_walk
+  - title: Parallel Map Functions
+    desc: Fault-tolerant replacements for furrr::future_map family
+    contents:
+      - s_future_map
+      - s_future_map2
+  - title: Error Handling Functions
+    desc: Safe execution and error capture
+    contents:
+      - s_safely
+      - s_possibly
+      - s_quietly
+  - title: Configuration & Management
+    desc: Session management and configuration
+    contents:
+      - s_configure
+      - s_clean_sessions
+
+footer:
+  structure:
+    left: developed_by
+    right: built_with
