@@ -1,4 +1,4 @@
-# SafeMapper <img src="https://img.shields.io/badge/R-276DC3?logo=r&logoColor=white" align="right" height="25"/>
+# SafeMapper <a href="https://zaoqu-liu.github.io/SafeMapper/"><img src="https://img.shields.io/badge/docs-pkgdown-blue.svg" alt="pkgdown" align="right" height="20"/></a> <img src="https://img.shields.io/badge/R-276DC3?logo=r&logoColor=white" align="right" height="20"/>
 
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/Zaoqu-Liu/SafeMapper/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/Zaoqu-Liu/SafeMapper/actions/workflows/R-CMD-check.yaml)
@@ -11,9 +11,16 @@
 
 > *Never lose your computational progress again.*
 
+<p align="center">
+  <a href="https://zaoqu-liu.github.io/SafeMapper/articles/quick-start.html"><strong>Quick Start</strong></a> •
+  <a href="https://zaoqu-liu.github.io/SafeMapper/reference/index.html"><strong>Reference</strong></a> •
+  <a href="https://zaoqu-liu.github.io/SafeMapper/articles/"><strong>Tutorials</strong></a> •
+  <a href="https://zaoqu-liu.github.io/SafeMapper/news/index.html"><strong>Changelog</strong></a>
+</p>
+
 ---
 
-## The Problem
+## 🎯 The Problem
 
 Long-running computations in R are vulnerable to interruptions:
 
@@ -31,9 +38,9 @@ result <- purrr::map(urls, fetch_data)
 - System restarts or power failures
 - Accidental interruption (Ctrl+C)
 
-## The Solution
+## ✅ The Solution
 
-SafeMapper provides **drop-in replacements** for `purrr` and `furrr` functions with automatic checkpoint-based recovery:
+SafeMapper provides **drop-in replacements** for [`purrr`](https://purrr.tidyverse.org/) and [`furrr`](https://furrr.futureverse.org/) functions with automatic checkpoint-based recovery:
 
 ```r
 # Same code, but fault-tolerant
@@ -49,7 +56,7 @@ result <- s_map(urls, fetch_data)
 
 ---
 
-## Installation
+## 📦 Installation
 
 ```r
 # From r-universe (recommended)
@@ -59,7 +66,7 @@ install.packages("SafeMapper", repos = "https://zaoqu-liu.r-universe.dev")
 devtools::install_github("Zaoqu-Liu/SafeMapper")
 ```
 
-## Quick Start
+## 🚀 Quick Start
 
 ```r
 library(SafeMapper)
@@ -73,75 +80,84 @@ results <- s_map(1:1000, function(x) {
 # If interrupted, just re-run - automatic recovery!
 ```
 
----
-
-## Key Features
-
-| Feature | Description |
-|---------|-------------|
-| **Zero Configuration** | Works out of the box - no setup required |
-| **Automatic Recovery** | Detects previous runs and resumes automatically |
-| **Drop-in Replacement** | Same API as `purrr` and `furrr` |
-| **Transparent Checkpointing** | Progress saved at configurable intervals |
-| **Parallel Support** | Full `furrr` compatibility for parallel processing |
+📖 **See full tutorial**: [Quick Start Guide](https://zaoqu-liu.github.io/SafeMapper/articles/quick-start.html)
 
 ---
 
-## Function Reference
+## ⭐ Key Features
 
-### Sequential Processing (purrr replacements)
+| Feature | Description | Learn More |
+|---------|-------------|------------|
+| **Zero Configuration** | Works out of the box - no setup required | [Quick Start](https://zaoqu-liu.github.io/SafeMapper/articles/quick-start.html) |
+| **Automatic Recovery** | Detects previous runs and resumes automatically | [Core Concepts](https://zaoqu-liu.github.io/SafeMapper/articles/core-concepts.html) |
+| **Drop-in Replacement** | Same API as `purrr` and `furrr` | [Map Functions](https://zaoqu-liu.github.io/SafeMapper/articles/map-functions.html) |
+| **Transparent Checkpointing** | Progress saved at configurable intervals | [Session Management](https://zaoqu-liu.github.io/SafeMapper/articles/session-management.html) |
+| **Parallel Support** | Full `furrr` compatibility for parallel processing | [Parallel Processing](https://zaoqu-liu.github.io/SafeMapper/articles/parallel-processing.html) |
+| **Robust Error Handling** | Built-in retry and error capture | [Error Handling](https://zaoqu-liu.github.io/SafeMapper/articles/error-handling.html) |
 
-| SafeMapper | purrr | Returns |
-|------------|-------|---------|
-| `s_map()` | `map()` | list |
-| `s_map_chr()` | `map_chr()` | character |
-| `s_map_dbl()` | `map_dbl()` | numeric |
-| `s_map_int()` | `map_int()` | integer |
-| `s_map_lgl()` | `map_lgl()` | logical |
-| `s_map_dfr()` | `map_dfr()` | data.frame (row-bind) |
-| `s_map_dfc()` | `map_dfc()` | data.frame (col-bind) |
-| `s_map2()` | `map2()` | list (two inputs) |
-| `s_pmap()` | `pmap()` | list (multiple inputs) |
-| `s_imap()` | `imap()` | list (with index) |
-| `s_walk()` | `walk()` | side effects |
+---
 
-### Parallel Processing (furrr replacements)
+## 🔧 Function Reference
 
-| SafeMapper | furrr |
-|------------|-------|
-| `s_future_map()` | `future_map()` |
-| `s_future_map2()` | `future_map2()` |
-| `s_future_pmap()` | `future_pmap()` |
-| `s_future_walk()` | `future_walk()` |
-| `s_future_imap()` | `future_imap()` |
+### Sequential Processing ([purrr](https://purrr.tidyverse.org/) replacements)
+
+| SafeMapper | purrr | Returns | Docs |
+|------------|-------|---------|------|
+| [`s_map()`](https://zaoqu-liu.github.io/SafeMapper/reference/s_map.html) | `map()` | list | [📖](https://zaoqu-liu.github.io/SafeMapper/reference/s_map.html) |
+| `s_map_chr()` | `map_chr()` | character | [📖](https://zaoqu-liu.github.io/SafeMapper/reference/s_map.html) |
+| `s_map_dbl()` | `map_dbl()` | numeric | [📖](https://zaoqu-liu.github.io/SafeMapper/reference/s_map.html) |
+| `s_map_int()` | `map_int()` | integer | [📖](https://zaoqu-liu.github.io/SafeMapper/reference/s_map.html) |
+| `s_map_lgl()` | `map_lgl()` | logical | [📖](https://zaoqu-liu.github.io/SafeMapper/reference/s_map.html) |
+| `s_map_dfr()` | `map_dfr()` | data.frame (row-bind) | [📖](https://zaoqu-liu.github.io/SafeMapper/reference/s_map.html) |
+| `s_map_dfc()` | `map_dfc()` | data.frame (col-bind) | [📖](https://zaoqu-liu.github.io/SafeMapper/reference/s_map.html) |
+| [`s_map2()`](https://zaoqu-liu.github.io/SafeMapper/reference/s_map2.html) | `map2()` | list (two inputs) | [📖](https://zaoqu-liu.github.io/SafeMapper/reference/s_map2.html) |
+| [`s_pmap()`](https://zaoqu-liu.github.io/SafeMapper/reference/s_pmap.html) | `pmap()` | list (multiple inputs) | [📖](https://zaoqu-liu.github.io/SafeMapper/reference/s_pmap.html) |
+| [`s_imap()`](https://zaoqu-liu.github.io/SafeMapper/reference/s_imap.html) | `imap()` | list (with index) | [📖](https://zaoqu-liu.github.io/SafeMapper/reference/s_imap.html) |
+| [`s_walk()`](https://zaoqu-liu.github.io/SafeMapper/reference/s_walk.html) | `walk()` | side effects | [📖](https://zaoqu-liu.github.io/SafeMapper/reference/s_walk.html) |
+
+### Parallel Processing ([furrr](https://furrr.futureverse.org/) replacements)
+
+| SafeMapper | furrr | Docs |
+|------------|-------|------|
+| [`s_future_map()`](https://zaoqu-liu.github.io/SafeMapper/reference/s_future_map.html) | `future_map()` | [📖](https://zaoqu-liu.github.io/SafeMapper/reference/s_future_map.html) |
+| [`s_future_map2()`](https://zaoqu-liu.github.io/SafeMapper/reference/s_future_map2.html) | `future_map2()` | [📖](https://zaoqu-liu.github.io/SafeMapper/reference/s_future_map2.html) |
+| `s_future_pmap()` | `future_pmap()` | [📖](https://zaoqu-liu.github.io/SafeMapper/reference/s_pmap.html) |
+| `s_future_walk()` | `future_walk()` | [📖](https://zaoqu-liu.github.io/SafeMapper/reference/s_walk.html) |
+| `s_future_imap()` | `future_imap()` | [📖](https://zaoqu-liu.github.io/SafeMapper/reference/s_imap.html) |
 
 *All variants (`_chr`, `_dbl`, `_int`, `_lgl`, `_dfr`, `_dfc`) are supported.*
 
 ### Error Handling
 
-| SafeMapper | purrr | Description |
-|------------|-------|-------------|
-| `s_safely()` | `safely()` | Capture errors |
-| `s_possibly()` | `possibly()` | Return default on error |
-| `s_quietly()` | `quietly()` | Capture messages/warnings |
+| SafeMapper | purrr | Description | Docs |
+|------------|-------|-------------|------|
+| [`s_safely()`](https://zaoqu-liu.github.io/SafeMapper/reference/s_safely.html) | `safely()` | Capture errors | [📖](https://zaoqu-liu.github.io/SafeMapper/reference/s_safely.html) |
+| [`s_possibly()`](https://zaoqu-liu.github.io/SafeMapper/reference/s_possibly.html) | `possibly()` | Return default on error | [📖](https://zaoqu-liu.github.io/SafeMapper/reference/s_possibly.html) |
+| [`s_quietly()`](https://zaoqu-liu.github.io/SafeMapper/reference/s_quietly.html) | `quietly()` | Capture messages/warnings | [📖](https://zaoqu-liu.github.io/SafeMapper/reference/s_quietly.html) |
+
+📚 **Full API Reference**: [Reference Index](https://zaoqu-liu.github.io/SafeMapper/reference/index.html)
 
 ---
 
-## Configuration (Optional)
+## ⚙️ Configuration
 
 ```r
+# Optional: customize settings
 s_configure(
+
   batch_size = 100,      # Items per checkpoint (default: 100)
   retry_attempts = 3     # Retry failed batches (default: 3)
 )
 
 # Clean old checkpoint files
-s_clean_sessions(days_old = 7)
+s_clean_sessions(older_than_days = 7)
 ```
+
+📖 **Learn more**: [Session Management Guide](https://zaoqu-liu.github.io/SafeMapper/articles/session-management.html)
 
 ---
 
-## How It Works
+## 🔄 How It Works
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -168,43 +184,78 @@ s_clean_sessions(days_old = 7)
 3. **Recovery**: On re-run, matching fingerprints trigger automatic restoration
 4. **Cleanup**: Checkpoints are removed after successful completion
 
----
-
-## Use Cases
-
-- **API Data Collection**: Web scraping, REST API calls with rate limits
-- **Bioinformatics**: Processing large genomic datasets
-- **Machine Learning**: Batch predictions, cross-validation
-- **File Processing**: ETL pipelines, batch transformations
-- **Any Long-Running Task**: Where losing progress is costly
+📖 **Deep dive**: [Core Concepts & Architecture](https://zaoqu-liu.github.io/SafeMapper/articles/core-concepts.html)
 
 ---
 
-## 📚 Tutorials
+## 💼 Use Cases
 
-Comprehensive tutorials are available to help you master SafeMapper:
+| Use Case | Description | Example |
+|----------|-------------|---------|
+| **API Data Collection** | Web scraping, REST API calls with rate limits | [View Example](https://zaoqu-liu.github.io/SafeMapper/articles/real-world-examples.html#example-1-web-api-data-collection) |
+| **File Processing** | ETL pipelines, batch transformations | [View Example](https://zaoqu-liu.github.io/SafeMapper/articles/real-world-examples.html#example-2-batch-file-processing) |
+| **Machine Learning** | Cross-validation, hyperparameter tuning | [View Example](https://zaoqu-liu.github.io/SafeMapper/articles/real-world-examples.html#example-3-machine-learning-cross-validation) |
+| **Web Scraping** | Extracting data from thousands of pages | [View Example](https://zaoqu-liu.github.io/SafeMapper/articles/real-world-examples.html#example-4-web-scraping-pipeline) |
+| **Bioinformatics** | Processing large genomic datasets | [View Example](https://zaoqu-liu.github.io/SafeMapper/articles/real-world-examples.html#example-5-parallel-bioinformatics-pipeline) |
+| **Database Migration** | Moving data between systems | [View Example](https://zaoqu-liu.github.io/SafeMapper/articles/real-world-examples.html#example-6-database-migration) |
+
+📖 **All examples**: [Real-World Examples](https://zaoqu-liu.github.io/SafeMapper/articles/real-world-examples.html)
+
+---
+
+## 📚 Documentation & Tutorials
+
+### Getting Started
+
+| Tutorial | Description | Time |
+|----------|-------------|------|
+| [🚀 Quick Start](https://zaoqu-liu.github.io/SafeMapper/articles/quick-start.html) | Get up and running | 5 min |
+| [🧠 Core Concepts](https://zaoqu-liu.github.io/SafeMapper/articles/core-concepts.html) | Understand the architecture | 15 min |
+
+### Function Guides
 
 | Tutorial | Description | Level |
 |----------|-------------|-------|
-| [Quick Start](https://zaoqu-liu.github.io/SafeMapper/articles/quick-start.html) | Get up and running in 5 minutes | Beginner |
-| [Core Concepts](https://zaoqu-liu.github.io/SafeMapper/articles/core-concepts.html) | Understand fingerprinting, checkpointing, and recovery | Beginner |
-| [Map Functions](https://zaoqu-liu.github.io/SafeMapper/articles/map-functions.html) | Complete guide to s_map, s_map2, s_pmap, s_imap, s_walk | Intermediate |
-| [Parallel Processing](https://zaoqu-liu.github.io/SafeMapper/articles/parallel-processing.html) | Speed up with s_future_map and furrr integration | Intermediate |
-| [Error Handling](https://zaoqu-liu.github.io/SafeMapper/articles/error-handling.html) | Strategies with s_safely, s_possibly, s_quietly | Intermediate |
-| [Session Management](https://zaoqu-liu.github.io/SafeMapper/articles/session-management.html) | Configure and manage checkpoints | Intermediate |
-| [Real-World Examples](https://zaoqu-liu.github.io/SafeMapper/articles/real-world-examples.html) | API collection, file processing, ML pipelines | Advanced |
-| [Best Practices](https://zaoqu-liu.github.io/SafeMapper/articles/best-practices.html) | Production-ready patterns and anti-patterns | Advanced |
+| [🗺️ Map Functions](https://zaoqu-liu.github.io/SafeMapper/articles/map-functions.html) | Complete guide to all s_map variants | Intermediate |
+| [⚡ Parallel Processing](https://zaoqu-liu.github.io/SafeMapper/articles/parallel-processing.html) | Speed up with s_future_map | Intermediate |
+| [🛡️ Error Handling](https://zaoqu-liu.github.io/SafeMapper/articles/error-handling.html) | s_safely, s_possibly, s_quietly | Intermediate |
+| [📋 Session Management](https://zaoqu-liu.github.io/SafeMapper/articles/session-management.html) | Configure and manage checkpoints | Intermediate |
 
-📖 **Full documentation**: [https://zaoqu-liu.github.io/SafeMapper/](https://zaoqu-liu.github.io/SafeMapper/)
+### Advanced Topics
+
+| Tutorial | Description | Level |
+|----------|-------------|-------|
+| [🎯 Real-World Examples](https://zaoqu-liu.github.io/SafeMapper/articles/real-world-examples.html) | Complete production examples | Advanced |
+| [🏆 Best Practices](https://zaoqu-liu.github.io/SafeMapper/articles/best-practices.html) | Production patterns & anti-patterns | Advanced |
+
+### Quick Links
+
+- 📖 **[Full Documentation](https://zaoqu-liu.github.io/SafeMapper/)**
+- 📚 **[All Tutorials](https://zaoqu-liu.github.io/SafeMapper/articles/)**
+- 🔧 **[Function Reference](https://zaoqu-liu.github.io/SafeMapper/reference/index.html)**
+- 📰 **[Changelog](https://zaoqu-liu.github.io/SafeMapper/news/index.html)**
 
 ---
 
-## Author
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a [Pull Request](https://github.com/Zaoqu-Liu/SafeMapper/pulls) or open an [Issue](https://github.com/Zaoqu-Liu/SafeMapper/issues).
+
+## 👤 Author
 
 **Zaoqu Liu**  
-Email: liuzaoqu@163.com  
-GitHub: [@Zaoqu-Liu](https://github.com/Zaoqu-Liu)
+- 📧 Email: liuzaoqu@163.com  
+- 🐙 GitHub: [@Zaoqu-Liu](https://github.com/Zaoqu-Liu)
+- 🔬 ORCID: [0000-0002-0452-742X](https://orcid.org/0000-0002-0452-742X)
 
-## License
+## 📄 License
 
 MIT © 2026 Zaoqu Liu
+
+---
+
+<p align="center">
+  <a href="https://zaoqu-liu.github.io/SafeMapper/">Documentation</a> •
+  <a href="https://github.com/Zaoqu-Liu/SafeMapper/issues">Report Bug</a> •
+  <a href="https://github.com/Zaoqu-Liu/SafeMapper/issues">Request Feature</a>
+</p>
