@@ -2,7 +2,7 @@
 % Please edit documentation in R/debugging.R
 \name{s_debug_session}
 \alias{s_debug_session}
-\title{Debug a Specific SafeMapper Session}
+\title{Debug a SafeMapper Session}
 \usage{
 s_debug_session(session_id)
 }
@@ -10,11 +10,7 @@ s_debug_session(session_id)
 \item{session_id}{Character. Session ID to debug.}
 }
 \description{
-Provides detailed diagnostic information about a specific session,
+Provides diagnostic information about a specific checkpoint session,
 including progress, errors, and suggested fixes.
 }
-\examples{
-# Debug a failed session
-s_debug_session("map_20240101_120000_abcd1234")
-
-}
+\keyword{internal}

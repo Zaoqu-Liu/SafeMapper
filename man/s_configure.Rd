@@ -2,49 +2,36 @@
 % Please edit documentation in R/configure.R
 \name{s_configure}
 \alias{s_configure}
-\title{Configure SafeMapper Session}
+\title{Configure SafeMapper Settings}
 \usage{
-s_configure(
-  session_id = NULL,
-  batch_size = 50L,
-  cache_dir = ".safe_purrr_cache",
-  retry_attempts = 3L,
-  auto_recover = TRUE
-)
+s_configure(batch_size = 100L, retry_attempts = 3L, auto_recover = TRUE)
 }
 \arguments{
-\item{session_id}{Character. Unique session identifier for recovery. If NULL,
-auto-generated based on timestamp and operation.}
+\item{batch_size}{Integer. Number of items to process per batch before
+checkpointing. Smaller values provide more frequent saves but may slow
+processing. Default is 100.}
 
-\item{batch_size}{Integer. Number of items to process per batch before checkpointing.
-Smaller values provide more frequent saves but may slow processing.}
-
-\item{cache_dir}{Character. Directory path for storing checkpoint files.}
-
-\item{retry_attempts}{Integer. Number of retry attempts for failed batches.}
+\item{retry_attempts}{Integer. Number of retry attempts for failed batches.
+Default is 3.}
 
 \item{auto_recover}{Logical. Whether to automatically resume from checkpoints
-when restarting operations.}
+when restarting operations. Default is TRUE.}
 }
 \value{
 Invisible list of current configuration settings.
 }
 \description{
-Set global configuration for safe mapping operations with automatic recovery.
-This function allows you to customize batch processing, caching, and retry behavior.
+Optionally customize SafeMapper behavior. This function is NOT required
+for basic usage - SafeMapper works out of the box with sensible defaults.
 }
 \examples{
-# Basic configuration
-s_configure()
+# Basic usage - no configuration needed!
+# result <- s_map(1:100, slow_function)
 
-# Custom configuration for large operations
-s_configure(
-  batch_size = 100,
-  cache_dir = "my_cache",
-  retry_attempts = 5
-)
+# Optional: customize for large operations
+s_configure(batch_size = 50)
 
-# Configuration for specific session
-s_configure(session_id = "data_processing_2024")
+# Optional: customize for unstable operations
+s_configure(retry_attempts = 5)
 
 }

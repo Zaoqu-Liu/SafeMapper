@@ -2,21 +2,27 @@
 % Please edit documentation in R/core_engine.R
 \name{.execute_batch_with_retry}
 \alias{.execute_batch_with_retry}
-\title{Execute Single Batch with Retry Logic}
+\title{Execute Batch with Retry Logic}
 \usage{
-.execute_batch_with_retry(
-  data,
-  func,
-  mode,
-  batch_indices,
-  config,
-  .options,
-  .env_globals,
-  .progress,
-  ...
-)
+.execute_batch_with_retry(data, func, batch_indices, mode, config, ...)
+}
+\arguments{
+\item{data}{List of input data.}
+
+\item{func}{Function to apply.}
+
+\item{batch_indices}{Integer vector of indices.}
+
+\item{mode}{Character operation mode.}
+
+\item{config}{Configuration list.}
+
+\item{...}{Additional arguments.}
+}
+\value{
+List of batch results.
 }
 \description{
-Execute Single Batch with Retry Logic
+Execute Batch with Retry Logic
 }
 \keyword{internal}

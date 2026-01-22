@@ -15,7 +15,7 @@ s_future_map2(
   .y,
   .f,
   ...,
-  .options = furrr::furrr_options(),
+  .options = NULL,
   .env_globals = parent.frame(),
   .progress = FALSE,
   .id = NULL,
@@ -27,7 +27,7 @@ s_future_map2_chr(
   .y,
   .f,
   ...,
-  .options = furrr::furrr_options(),
+  .options = NULL,
   .env_globals = parent.frame(),
   .progress = FALSE,
   .id = NULL,
@@ -39,7 +39,7 @@ s_future_map2_dbl(
   .y,
   .f,
   ...,
-  .options = furrr::furrr_options(),
+  .options = NULL,
   .env_globals = parent.frame(),
   .progress = FALSE,
   .id = NULL,
@@ -51,7 +51,7 @@ s_future_map2_int(
   .y,
   .f,
   ...,
-  .options = furrr::furrr_options(),
+  .options = NULL,
   .env_globals = parent.frame(),
   .progress = FALSE,
   .id = NULL,
@@ -63,7 +63,7 @@ s_future_map2_lgl(
   .y,
   .f,
   ...,
-  .options = furrr::furrr_options(),
+  .options = NULL,
   .env_globals = parent.frame(),
   .progress = FALSE,
   .id = NULL,
@@ -75,7 +75,7 @@ s_future_map2_dfr(
   .y,
   .f,
   ...,
-  .options = furrr::furrr_options(),
+  .options = NULL,
   .env_globals = parent.frame(),
   .progress = FALSE,
   .id = NULL,
@@ -87,7 +87,7 @@ s_future_map2_dfc(
   .y,
   .f,
   ...,
-  .options = furrr::furrr_options(),
+  .options = NULL,
   .env_globals = parent.frame(),
   .progress = FALSE,
   .id = NULL,
@@ -107,7 +107,7 @@ s_future_map2_dfc(
 
 \item{.progress}{A single logical.}
 
-\item{.id}{Optional name to use for ID column when row binding (dfr/dfc variants).}
+\item{.id}{Optional name for ID column (dfr/dfc variants).}
 
 \item{.session_id}{Character. Optional session ID.}
 }

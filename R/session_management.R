@@ -7,50 +7,20 @@
 #' Returns a data frame with information about all stored checkpoint sessions,
 #' including progress, completion rates, and status.
 #'
-#' @return Data frame with session information including:
-#'   \itemize{
-#'     \item session_id: Unique identifier for the session
-#'     \item created: Timestamp when session was created
-#'     \item items_completed: Number of items successfully processed
-#'     \item total_items: Total number of items in the operation
-#'     \item completion_rate: Percentage of completion (0-1)
-#'     \item status: Session status (in_progress, failed, corrupted)
-#'   }
+#' @return Data frame with session information.
 #'
-#' @examples
-#' # List all sessions
-#' sessions <- s_list_sessions()
-#' print(sessions)
-#'
-#' # Find incomplete sessions
-#' incomplete <- sessions[sessions$completion_rate < 1, ]
-#'
-#' @export
+#' @keywords internal
 s_list_sessions <- function() {
-  config <- .safemapper_sessions$config
-  checkpoint_dir <- file.path(config$cache_dir, "checkpoints")
+  cache_dir <- .get_cache_dir()
+  checkpoint_dir <- file.path(cache_dir, "checkpoints")
 
   if (!dir.exists(checkpoint_dir)) {
-    return(data.frame(
-      session_id = character(0),
-      created = as.POSIXct(character(0)),
-      items_completed = integer(0),
-      total_items = integer(0),
-      completion_rate = numeric(0),
-      status = character(0)
-    ))
+    return(.empty_sessions_df())
   }
 
-  files <- list.files(checkpoint_dir, pattern = "*.rds", full.names = TRUE)
+  files <- list.files(checkpoint_dir, pattern = "\\.rds$", full.names = TRUE)
   if (length(files) == 0) {
-    return(data.frame(
-      session_id = character(0),
-      created = as.POSIXct(character(0)),
-      items_completed = integer(0),
-      total_items = integer(0),
-      completion_rate = numeric(0),
-      status = character(0)
-    ))
+    return(.empty_sessions_df())
   }
 
   sessions <- data.frame(
@@ -76,10 +46,10 @@ s_list_sessions <- function() {
         sessions$status[i] <- if (!is.null(data$metadata$error_message)) "failed" else "in_progress"
       },
       error = function(e) {
-        sessions$items_completed[i] <- NA
-        sessions$total_items[i] <- NA
-        sessions$completion_rate[i] <- NA
-        sessions$status[i] <- "corrupted"
+        sessions$items_completed[i] <<- NA
+        sessions$total_items[i] <<- NA
+        sessions$completion_rate[i] <<- NA
+        sessions$status[i] <<- "corrupted"
       }
     )
   }
@@ -88,29 +58,31 @@ s_list_sessions <- function() {
   return(sessions[order(sessions$created, decreasing = TRUE), ])
 }
 
+#' Create Empty Sessions Data Frame
+#' @keywords internal
+.empty_sessions_df <- function() {
+  data.frame(
+    session_id = character(0),
+    created = as.POSIXct(character(0)),
+    items_completed = integer(0),
+    total_items = integer(0),
+    completion_rate = numeric(0),
+    status = character(0),
+    stringsAsFactors = FALSE
+  )
+}
+
 #' Recover a Specific SafeMapper Session
 #'
 #' Recovers and returns the results from a specific checkpoint session.
-#' This is useful for examining partial results or continuing computation
-#' after fixing errors.
 #'
 #' @param session_id Character. Session ID to recover.
 #'
 #' @return List of results from the session, or NULL if session not found.
 #'
-#' @examples
-#' # Recover a specific session
-#' results <- s_recover_session("map_20240101_120000_abcd1234")
-#'
-#' # Check if recovery was successful
-#' if (!is.null(results)) {
-#'   cat("Recovered", length(results), "items\n")
-#' }
-#'
-#' @export
+#' @keywords internal
 s_recover_session <- function(session_id) {
-  config <- .safemapper_sessions$config
-  checkpoint_file <- file.path(config$cache_dir, "checkpoints", paste0(session_id, ".rds"))
+  checkpoint_file <- .get_checkpoint_path(session_id)
 
   if (file.exists(checkpoint_file)) {
     data <- readRDS(checkpoint_file)
@@ -155,8 +127,8 @@ s_recover_session <- function(session_id) {
 #'
 #' @export
 s_clean_sessions <- function(older_than_days = 7, session_ids = NULL, status_filter = NULL) {
-  config <- .safemapper_sessions$config
-  checkpoint_dir <- file.path(config$cache_dir, "checkpoints")
+  cache_dir <- .get_cache_dir()
+  checkpoint_dir <- file.path(cache_dir, "checkpoints")
 
   if (!dir.exists(checkpoint_dir)) {
     message("No sessions found")
@@ -167,7 +139,7 @@ s_clean_sessions <- function(older_than_days = 7, session_ids = NULL, status_fil
     files_to_remove <- file.path(checkpoint_dir, paste0(session_ids, ".rds"))
     files_to_remove <- files_to_remove[file.exists(files_to_remove)]
   } else {
-    all_files <- list.files(checkpoint_dir, pattern = "*.rds", full.names = TRUE)
+    all_files <- list.files(checkpoint_dir, pattern = "\\.rds$", full.names = TRUE)
 
     if (length(all_files) == 0) {
       message("No session files found")

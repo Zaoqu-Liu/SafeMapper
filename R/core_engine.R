@@ -1,285 +1,6 @@
 # =============================================================================
-# Core Execution Engine (Simplified & Optimized)
+# Core Execution Engine
 # =============================================================================
-
-#' Core Safe Execution Engine
-#'
-#' Simplified execution engine with progress tracking and smart error handling.
-#'
-#' @keywords internal
-.safe_execute <- function(data, func, session_id, mode, output_type,
-                          .options = NULL, .env_globals = parent.frame(),
-                          .progress = FALSE, ...) {
-  # 1. Validate and initialize
-  .validate_inputs(data)
-  config <- .safemapper_sessions$config
-  total_items <- length(data[[1]])
-
-  # 2. Setup session
-  session_id <- session_id %||% .generate_session_id(mode)
-  checkpoint <- .init_checkpoint(session_id, data, mode, config)
-
-  # 3. Check if already completed
-  if (checkpoint$start_idx > total_items) {
-    .cleanup_checkpoint(checkpoint$file)
-    return(.format_output(checkpoint$results, output_type))
-  }
-
-  # 4. Process batches with progress
-  results <- .process_batches(
-    data = data,
-    func = func,
-    mode = mode,
-    checkpoint = checkpoint,
-    config = config,
-    total_items = total_items,
-    .options = .options,
-    .env_globals = .env_globals,
-    .progress = .progress,
-    ...
-  )
-
-  # 5. Cleanup and return
-  .cleanup_checkpoint(checkpoint$file)
-  message(sprintf("Completed %d items", total_items))
-
-  return(.format_output(results, output_type))
-}
-
-#' Validate Inputs
-#' @keywords internal
-.validate_inputs <- function(data) {
-  if (length(data) == 0 || length(data[[1]]) == 0) {
-    stop("Input data cannot be empty", call. = FALSE)
-  }
-
-  if (length(data) > 1) {
-    lengths <- vapply(data, length, integer(1))
-    if (!all(lengths == lengths[1])) {
-      stop("All input vectors must have the same length", call. = FALSE)
-    }
-  }
-}
-
-#' Generate Simple Session ID
-#' @keywords internal
-.generate_session_id <- function(mode) {
-  paste0(mode, "_", format(Sys.time(), "%Y%m%d_%H%M%S"))
-}
-
-#' Initialize or Resume Checkpoint
-#' @keywords internal
-.init_checkpoint <- function(session_id, data, mode, config) {
-  checkpoint_file <- file.path(
-    config$cache_dir, "checkpoints",
-    paste0(session_id, ".rds")
-  )
-
-  if (file.exists(checkpoint_file) && config$auto_recover) {
-    checkpoint_data <- readRDS(checkpoint_file)
-    start_idx <- length(checkpoint_data$results) + 1
-    message(sprintf(
-      "Resuming from item %d/%d", start_idx,
-      checkpoint_data$metadata$total_items
-    ))
-  } else {
-    checkpoint_data <- list(
-      results = list(),
-      metadata = list(
-        session_id = session_id,
-        total_items = length(data[[1]]),
-        mode = mode,
-        created = Sys.time()
-      )
-    )
-    start_idx <- 1
-  }
-
-  list(
-    file = checkpoint_file,
-    data = checkpoint_data,
-    results = checkpoint_data$results,
-    start_idx = start_idx
-  )
-}
-
-#' Process Batches with Progress Tracking
-#' @keywords internal
-.process_batches <- function(data, func, mode, checkpoint, config,
-                             total_items, .options, .env_globals,
-                             .progress, ...) {
-  results <- checkpoint$results
-  batch_size <- config$batch_size
-
-  for (batch_start in seq(checkpoint$start_idx, total_items, by = batch_size)) {
-    batch_end <- min(batch_start + batch_size - 1, total_items)
-    batch_indices <- batch_start:batch_end
-
-    # Progress indicator
-    pct <- round(100 * batch_start / total_items)
-    message(sprintf(
-      "[%d%%] Processing items %d-%d of %d",
-      pct, batch_start, batch_end, total_items
-    ))
-
-    # Execute batch with retry
-    batch_results <- .execute_batch_with_retry(
-      data = data,
-      func = func,
-      mode = mode,
-      batch_indices = batch_indices,
-      config = config,
-      .options = .options,
-      .env_globals = .env_globals,
-      .progress = .progress,
-      ...
-    )
-
-    # Store results and checkpoint
-    results[batch_indices] <- batch_results
-    .save_checkpoint(checkpoint$file, results, checkpoint$data$metadata)
-  }
-
-  results
-}
-
-#' Execute Single Batch with Retry Logic
-#' @keywords internal
-.execute_batch_with_retry <- function(data, func, mode, batch_indices,
-                                      config, .options, .env_globals,
-                                      .progress, ...) {
-  batch_data <- lapply(data, function(x) x[batch_indices])
-  last_error <- NULL
-
-  for (attempt in seq_len(config$retry_attempts)) {
-    result <- tryCatch(
-      {
-        .execute_mode(
-          mode, batch_data, func, batch_indices,
-          .options, .env_globals, .progress, ...
-        )
-      },
-      error = function(e) {
-        last_error <<- e
-        NULL
-      }
-    )
-
-    if (!is.null(result)) {
-      return(result)
-    }
-
-    # Retry logic
-    if (attempt < config$retry_attempts) {
-      message(sprintf(
-        "  Retry %d/%d: %s", attempt, config$retry_attempts,
-        last_error$message
-      ))
-      Sys.sleep(1)
-    }
-  }
-
-  stop(sprintf(
-    "Batch failed after %d attempts: %s",
-    config$retry_attempts, last_error$message
-  ), call. = FALSE)
-}
-
-#' Execute Specific Mode (Simplified Switch)
-#' @keywords internal
-.execute_mode <- function(mode, batch_data, func, batch_indices,
-                          .options, .env_globals, .progress, ...) {
-  # Sequential modes
-  if (mode %in% c("map", "walk", "imap")) {
-    fn <- switch(mode,
-      "map" = purrr::map,
-      "walk" = purrr::walk,
-      "imap" = purrr::imap
-    )
-    result <- fn(batch_data[[1]], func, ...)
-    if (mode == "walk") {
-      return(rep(list(NULL), length(batch_indices)))
-    }
-    return(result)
-  }
-
-  # Two-argument modes
-  if (mode %in% c("map2", "walk2")) {
-    fn <- switch(mode,
-      "map2" = purrr::map2,
-      "walk2" = purrr::walk2
-    )
-    result <- fn(batch_data[[1]], batch_data[[2]], func, ...)
-    if (mode == "walk2") {
-      return(rep(list(NULL), length(batch_indices)))
-    }
-    return(result)
-  }
-
-  # Multi-argument modes
-  if (mode == "pmap") {
-    # For pmap, batch_data is already in correct format: list(a=vec, b=vec, c=vec)
-    # We just need to pass it directly to purrr::pmap
-    return(purrr::pmap(batch_data, func, ...))
-  }
-
-  # Future modes
-  if (grepl("^future_", mode)) {
-    if (is.null(.options)) .options <- furrr::furrr_options()
-
-    base_mode <- sub("^future_", "", mode)
-
-    if (base_mode == "map") {
-      return(furrr::future_map(batch_data[[1]], func, ...,
-        .options = .options, .env_globals = .env_globals,
-        .progress = .progress
-      ))
-    } else if (base_mode == "map2") {
-      return(furrr::future_map2(batch_data[[1]], batch_data[[2]], func, ...,
-        .options = .options, .env_globals = .env_globals,
-        .progress = .progress
-      ))
-    } else if (base_mode == "pmap") {
-      # For future_pmap, batch_data is already in correct format
-      return(furrr::future_pmap(batch_data, func, ...,
-        .options = .options, .env_globals = .env_globals,
-        .progress = .progress
-      ))
-    } else if (base_mode == "walk") {
-      furrr::future_walk(batch_data[[1]], func, ...,
-        .options = .options, .env_globals = .env_globals,
-        .progress = .progress
-      )
-      return(rep(list(NULL), length(batch_indices)))
-    } else if (base_mode == "walk2") {
-      furrr::future_walk2(batch_data[[1]], batch_data[[2]], func, ...,
-        .options = .options, .env_globals = .env_globals,
-        .progress = .progress
-      )
-      return(rep(list(NULL), length(batch_indices)))
-    } else if (base_mode == "imap") {
-      return(furrr::future_imap(batch_data[[1]], func, ...,
-        .options = .options, .env_globals = .env_globals,
-        .progress = .progress
-      ))
-    }
-  }
-
-  stop("Unknown mode: ", mode, call. = FALSE)
-}
-
-#' Save Checkpoint
-#' @keywords internal
-.save_checkpoint <- function(file, results, metadata) {
-  metadata$last_updated <- Sys.time()
-  saveRDS(list(results = results, metadata = metadata), file)
-}
-
-#' Cleanup Checkpoint File
-#' @keywords internal
-.cleanup_checkpoint <- function(file) {
-  if (file.exists(file)) file.remove(file)
-}
 
 #' Null-coalescing Operator
 #'
@@ -294,22 +15,363 @@ NULL
 #' @rdname null-default
 `%||%` <- function(x, y) if (is.null(x)) y else x
 
+#' Generate Data Fingerprint
+#'
+#' Creates a stable identifier based on input data characteristics.
+#' Used for automatic session identification without user intervention.
+#'
+#' @param data List of input data vectors.
+#' @param mode Character string indicating the operation mode.
+#' @return Character string fingerprint.
+#' @keywords internal
+.make_fingerprint <- function(data, mode) {
+  n <- length(data[[1]])
+  if (n == 0) return(paste0(mode, "_empty"))
+  
+  features <- list(
+    mode  = mode,
+    len   = n,
+    class = class(data[[1]]),
+    first = data[[1]][[1]],
+    last  = data[[1]][[n]]
+  )
+  
+  paste0(mode, "_", digest::digest(features, algo = "xxhash64"))
+}
+
+#' Get Checkpoint File Path
+#'
+#' @param session_id Character session identifier.
+#' @return Character file path.
+#' @keywords internal
+.get_checkpoint_path <- function(session_id) {
+  cache_dir <- .get_cache_dir()
+  file.path(cache_dir, "checkpoints", paste0(session_id, ".rds"))
+}
+
+#' Try to Restore from Checkpoint
+#'
+#' Attempts to load an existing checkpoint and verify it matches current data.
+#'
+#' @param session_id Character session identifier.
+#' @param total_items Integer total number of items expected.
+#' @return List with results and completed_items, or NULL if not found/invalid.
+#' @keywords internal
+.try_restore <- function(session_id, total_items) {
+  config <- .get_config()
+  if (!config$auto_recover) return(NULL)
+  
+  checkpoint_file <- .get_checkpoint_path(session_id)
+  if (!file.exists(checkpoint_file)) return(NULL)
+  
+  checkpoint <- tryCatch(
+    readRDS(checkpoint_file),
+    error = function(e) NULL
+  )
+  
+  if (is.null(checkpoint)) return(NULL)
+  
+  # Verify data length matches
+  if (checkpoint$metadata$total_items != total_items) {
+    return(NULL)
+  }
+  
+  # Return results and completed count
+  list(
+    results = checkpoint$results,
+    completed_items = checkpoint$metadata$completed_items %||% 0
+  )
+}
+
+#' Save Checkpoint
+#'
+#' @param session_id Character session identifier.
+#' @param results List of results so far.
+#' @param total_items Integer total number of items.
+#' @param mode Character operation mode.
+#' @param completed_idx Integer index of last completed item.
+#' @keywords internal
+.save_checkpoint <- function(session_id, results, total_items, mode, completed_idx) {
+  checkpoint_file <- .get_checkpoint_path(session_id)
+  
+  checkpoint_data <- list(
+    results = results,
+    metadata = list(
+      session_id = session_id,
+      total_items = total_items,
+      completed_items = completed_idx,
+      mode = mode,
+      created = Sys.time(),
+      last_updated = Sys.time()
+    )
+  )
+  
+  saveRDS(checkpoint_data, checkpoint_file)
+}
+
+#' Cleanup Checkpoint File
+#'
+#' @param session_id Character session identifier.
+#' @keywords internal
+.cleanup_checkpoint <- function(session_id) {
+  checkpoint_file <- .get_checkpoint_path(session_id)
+  if (file.exists(checkpoint_file)) {
+    file.remove(checkpoint_file)
+  }
+}
+
+#' Execute Single Batch
+#'
+#' @param data List of input data.
+#' @param func Function to apply.
+#' @param batch_indices Integer vector of indices for this batch.
+#' @param mode Character operation mode.
+#' @param ... Additional arguments passed to func.
+#' @return List of batch results.
+#' @keywords internal
+.execute_batch <- function(data, func, batch_indices, mode,
+                           .options = NULL, .env_globals = NULL,
+                           .progress = FALSE, ...) {
+  batch_data <- lapply(data, function(x) x[batch_indices])
+  
+  # Sequential modes
+  if (mode == "map") {
+    return(purrr::map(batch_data[[1]], func, ...))
+  }
+  
+  if (mode == "walk") {
+    purrr::walk(batch_data[[1]], func, ...)
+    return(rep(list(NULL), length(batch_indices)))
+  }
+  
+  if (mode == "imap") {
+    # For imap, we need to pass the original indices
+    return(purrr::imap(batch_data[[1]], func, ...))
+  }
+  
+  if (mode == "map2") {
+    return(purrr::map2(batch_data[[1]], batch_data[[2]], func, ...))
+  }
+  
+  if (mode == "walk2") {
+    purrr::walk2(batch_data[[1]], batch_data[[2]], func, ...)
+    return(rep(list(NULL), length(batch_indices)))
+  }
+  
+  if (mode == "pmap") {
+    return(purrr::pmap(batch_data, func, ...))
+  }
+  
+  # Future (parallel) modes - require furrr
+  if (grepl("^future_", mode)) {
+    .check_furrr()
+    
+    if (is.null(.options)) .options <- furrr::furrr_options()
+    if (is.null(.env_globals)) .env_globals <- parent.frame(2)
+    
+    base_mode <- sub("^future_", "", mode)
+    
+    if (base_mode == "map") {
+      return(furrr::future_map(batch_data[[1]], func, ...,
+                               .options = .options,
+                               .progress = .progress))
+    }
+    
+    if (base_mode == "map2") {
+      return(furrr::future_map2(batch_data[[1]], batch_data[[2]], func, ...,
+                                .options = .options,
+                                .progress = .progress))
+    }
+    
+    if (base_mode == "pmap") {
+      return(furrr::future_pmap(batch_data, func, ...,
+                                .options = .options,
+                                .progress = .progress))
+    }
+    
+    if (base_mode == "walk") {
+      furrr::future_walk(batch_data[[1]], func, ...,
+                         .options = .options,
+                         .progress = .progress)
+      return(rep(list(NULL), length(batch_indices)))
+    }
+    
+    if (base_mode == "walk2") {
+      furrr::future_walk2(batch_data[[1]], batch_data[[2]], func, ...,
+                          .options = .options,
+                          .progress = .progress)
+      return(rep(list(NULL), length(batch_indices)))
+    }
+    
+    if (base_mode == "imap") {
+      return(furrr::future_imap(batch_data[[1]], func, ...,
+                                .options = .options,
+                                .progress = .progress))
+    }
+  }
+  
+  stop("Unknown mode: ", mode, call. = FALSE)
+}
+
+#' Execute Batch with Retry Logic
+#'
+#' @param data List of input data.
+#' @param func Function to apply.
+#' @param batch_indices Integer vector of indices.
+#' @param mode Character operation mode.
+#' @param config Configuration list.
+#' @param ... Additional arguments.
+#' @return List of batch results.
+#' @keywords internal
+.execute_batch_with_retry <- function(data, func, batch_indices, mode, config, ...) {
+  last_error <- NULL
+  
+  for (attempt in seq_len(config$retry_attempts)) {
+    result <- tryCatch(
+      .execute_batch(data, func, batch_indices, mode, ...),
+      error = function(e) {
+        last_error <<- e
+        NULL
+      }
+    )
+    
+    if (!is.null(result)) {
+      return(result)
+    }
+    
+    if (attempt < config$retry_attempts) {
+      message(sprintf("  Retry %d/%d: %s",
+                      attempt, config$retry_attempts, last_error$message))
+      Sys.sleep(1)
+    }
+  }
+  
+  stop(sprintf("Batch failed after %d attempts: %s",
+               config$retry_attempts, last_error$message), call. = FALSE)
+}
+
+#' Core Safe Execution Engine
+#'
+#' Main entry point for all safe mapping operations. Handles automatic
+#' checkpointing and recovery without user intervention.
+#'
+#' @param data List of input data vectors.
+#' @param func Function to apply.
+#' @param session_id Optional character session ID (auto-generated if NULL).
+#' @param mode Character operation mode.
+#' @param output_type Character output type for formatting.
+#' @param .options furrr options (for parallel modes).
+#' @param .env_globals Environment for globals (for parallel modes).
+#' @param .progress Logical show progress (for parallel modes).
+#' @param ... Additional arguments passed to func.
+#' @return Formatted results.
+#' @keywords internal
+.safe_execute <- function(data, func, session_id, mode, output_type,
+                          .options = NULL, .env_globals = NULL,
+                          .progress = FALSE, ...) {
+  # Handle empty input
+  total <- length(data[[1]])
+  if (total == 0) {
+    return(.format_output(list(), output_type))
+  }
+  
+  # Validate multi-input lengths
+  if (length(data) > 1) {
+    lengths <- vapply(data, length, integer(1))
+    if (!all(lengths == lengths[1])) {
+      stop("All input vectors must have the same length", call. = FALSE)
+    }
+  }
+  
+  config <- .get_config()
+  
+  # Auto-generate session_id from data fingerprint if not provided
+  session_id <- session_id %||% .make_fingerprint(data, mode)
+  
+  # Try to restore from checkpoint
+  restored <- .try_restore(session_id, total)
+  
+  if (!is.null(restored)) {
+    results <- restored$results
+    start_idx <- restored$completed_items + 1
+    
+    if (start_idx <= total) {
+      message(sprintf("Resuming from item %d/%d", start_idx, total))
+    }
+  } else {
+    results <- vector("list", total)
+    start_idx <- 1
+  }
+  
+  # Already completed
+  if (start_idx > total) {
+    .cleanup_checkpoint(session_id)
+    return(.format_output(results, output_type))
+  }
+  
+  # Process remaining batches
+  batch_size <- config$batch_size
+  
+  for (batch_start in seq(start_idx, total, by = batch_size)) {
+    batch_end <- min(batch_start + batch_size - 1, total)
+    batch_indices <- batch_start:batch_end
+    
+    # Progress indicator
+    pct <- round(100 * batch_start / total)
+    message(sprintf("[%d%%] Processing items %d-%d of %d",
+                    pct, batch_start, batch_end, total))
+    
+    # Execute batch with retry
+    batch_results <- .execute_batch_with_retry(
+      data = data,
+      func = func,
+      batch_indices = batch_indices,
+      mode = mode,
+      config = config,
+      .options = .options,
+      .env_globals = .env_globals,
+      .progress = .progress,
+      ...
+    )
+    
+    # Store results
+    results[batch_indices] <- batch_results
+    
+    # Save checkpoint with completed index
+    .save_checkpoint(session_id, results, total, mode, batch_end)
+  }
+  
+  # Success - cleanup checkpoint
+  .cleanup_checkpoint(session_id)
+  message(sprintf("Completed %d items", total))
+  
+  .format_output(results, output_type)
+}
+
+#' Check if furrr is Available
+#'
+#' @keywords internal
+.check_furrr <- function() {
+  if (!requireNamespace("furrr", quietly = TRUE)) {
+    stop("Package 'furrr' is required for parallel functions. ",
+         "Install it with: install.packages('furrr')", call. = FALSE)
+  }
+}
+
 #' Format Output According to Type
 #'
-#' Internal function to format results according to the expected output type.
-#'
-#' @param results List of results from processing
-#' @param output_type Expected output type
-#' @return Formatted output
+#' @param results List of results.
+#' @param output_type Character output type.
+#' @return Formatted output.
 #' @keywords internal
 .format_output <- function(results, output_type) {
   switch(output_type,
-    "list" = results,
-    "character" = unlist(results),
-    "double" = unlist(results),
-    "integer" = unlist(results),
-    "logical" = unlist(results),
-    "walk" = NULL,
-    results
+         "list" = results,
+         "character" = unlist(results),
+         "double" = unlist(results),
+         "integer" = unlist(results),
+         "logical" = unlist(results),
+         "walk" = NULL,
+         results
   )
 }

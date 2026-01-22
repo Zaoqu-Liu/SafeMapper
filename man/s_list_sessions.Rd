@@ -7,26 +7,10 @@
 s_list_sessions()
 }
 \value{
-Data frame with session information including:
-  \itemize{
-    \item session_id: Unique identifier for the session
-    \item created: Timestamp when session was created
-    \item items_completed: Number of items successfully processed
-    \item total_items: Total number of items in the operation
-    \item completion_rate: Percentage of completion (0-1)
-    \item status: Session status (in_progress, failed, corrupted)
-  }
+Data frame with session information.
 }
 \description{
 Returns a data frame with information about all stored checkpoint sessions,
 including progress, completion rates, and status.
 }
-\examples{
-# List all sessions
-sessions <- s_list_sessions()
-print(sessions)
-
-# Find incomplete sessions
-incomplete <- sessions[sessions$completion_rate < 1, ]
-
-}
+\keyword{internal}

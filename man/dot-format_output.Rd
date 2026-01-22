@@ -7,14 +7,14 @@
 .format_output(results, output_type)
 }
 \arguments{
-\item{results}{List of results from processing}
+\item{results}{List of results.}
 
-\item{output_type}{Expected output type}
+\item{output_type}{Character output type.}
 }
 \value{
-Formatted output
+Formatted output.
 }
 \description{
-Internal function to format results according to the expected output type.
+Format Output According to Type
 }
 \keyword{internal}

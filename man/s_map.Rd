@@ -31,9 +31,11 @@ s_map_dfc(.x, .f, ..., .id = NULL, .session_id = NULL)
 
 \item{...}{Additional arguments passed to .f.}
 
-\item{.id}{Either a string or NULL for row binding.}
+\item{.id}{Either a string or NULL (used for dfr/dfc variants).}
 
-\item{.session_id}{Character. Optional session ID for this operation.}
+\item{.session_id}{Character. Optional session ID for this operation.
+If NULL (default), a session ID is automatically generated from the
+input data, enabling seamless recovery without user intervention.}
 }
 \value{
 A list, same as purrr::map.
@@ -51,8 +53,12 @@ A data frame (row bind).
 A data frame (column bind).
 }
 \description{
-Safe Map - Drop-in Replacement for purrr::map with Auto-Recovery
+Apply a function to each element of a list or vector with automatic
+checkpointing and recovery. If interrupted, simply run the same code
+again to resume from where it left off.
 }
 \examples{
+# Basic usage - identical to purrr::map
 result <- s_map(1:10, ~ .x^2)
+
 }

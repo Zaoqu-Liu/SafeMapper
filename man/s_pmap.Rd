@@ -11,7 +11,7 @@ s_future_pmap(
   .l,
   .f,
   ...,
-  .options = furrr::furrr_options(),
+  .options = NULL,
   .env_globals = parent.frame(),
   .progress = FALSE,
   .session_id = NULL
@@ -26,11 +26,11 @@ s_future_pmap(
 
 \item{.session_id}{Character. Optional session ID.}
 
-\item{.options}{A furrr_options object (for s_future_pmap only).}
+\item{.options}{A furrr_options object (NULL uses defaults).}
 
-\item{.env_globals}{The environment to look for globals (for s_future_pmap only).}
+\item{.env_globals}{The environment to look for globals.}
 
-\item{.progress}{A single logical for progress bar (for s_future_pmap only).}
+\item{.progress}{A single logical for progress bar.}
 }
 \value{
 A list.

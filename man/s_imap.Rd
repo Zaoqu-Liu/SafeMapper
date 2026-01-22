@@ -14,7 +14,7 @@ s_future_imap(
   .x,
   .f,
   ...,
-  .options = furrr::furrr_options(),
+  .options = NULL,
   .env_globals = parent.frame(),
   .progress = FALSE,
   .session_id = NULL
@@ -29,7 +29,7 @@ s_future_imap(
 
 \item{.session_id}{Character. Optional session ID.}
 
-\item{.options}{A furrr_options object.}
+\item{.options}{A furrr_options object (NULL uses defaults).}
 
 \item{.env_globals}{The environment to look for globals.}
 

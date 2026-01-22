@@ -4,7 +4,18 @@
 \alias{.save_checkpoint}
 \title{Save Checkpoint}
 \usage{
-.save_checkpoint(file, results, metadata)
+.save_checkpoint(session_id, results, total_items, mode, completed_idx)
+}
+\arguments{
+\item{session_id}{Character session identifier.}
+
+\item{results}{List of results so far.}
+
+\item{total_items}{Integer total number of items.}
+
+\item{mode}{Character operation mode.}
+
+\item{completed_idx}{Integer index of last completed item.}
 }
 \description{
 Save Checkpoint

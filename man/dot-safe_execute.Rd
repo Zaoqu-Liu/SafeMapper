@@ -11,12 +11,35 @@
   mode,
   output_type,
   .options = NULL,
-  .env_globals = parent.frame(),
+  .env_globals = NULL,
   .progress = FALSE,
   ...
 )
 }
+\arguments{
+\item{data}{List of input data vectors.}
+
+\item{func}{Function to apply.}
+
+\item{session_id}{Optional character session ID (auto-generated if NULL).}
+
+\item{mode}{Character operation mode.}
+
+\item{output_type}{Character output type for formatting.}
+
+\item{.options}{furrr options (for parallel modes).}
+
+\item{.env_globals}{Environment for globals (for parallel modes).}
+
+\item{.progress}{Logical show progress (for parallel modes).}
+
+\item{...}{Additional arguments passed to func.}
+}
+\value{
+Formatted results.
+}
 \description{
-Simplified execution engine with progress tracking and smart error handling.
+Main entry point for all safe mapping operations. Handles automatic
+checkpointing and recovery without user intervention.
 }
 \keyword{internal}

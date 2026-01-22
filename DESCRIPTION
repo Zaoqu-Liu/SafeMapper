@@ -1,31 +1,32 @@
 Package: SafeMapper
 Type: Package
-Title: Fault-Tolerant and Resumable Functional Programming with Automatic Recovery
+Title: Fault-Tolerant Functional Programming with Automatic Checkpointing
 Version: 1.0.0
-Author: Zaoqu Liu <liuzaoqu@163.com>
-Maintainer: Zaoqu Liu <liuzaoqu@163.com>
-Description: SafeMapper provides drop-in replacements for purrr and furrr mapping functions
-    with built-in fault tolerance, automatic checkpointing, and seamless recovery capabilities.
-    It extends the popular purrr and furrr packages by adding robust error handling and progress
-    persistence. SafeMapper solves the critical problem of losing computation progress when
-    long-running mapping operations fail due to network issues, memory errors, system crashes,
-    or other interruptions. The package automatically saves progress at configurable intervals
-    and can resume from the exact point of failure, making it indispensable for large-scale
-    data processing, API calls, web scraping, machine learning workflows, and other
-    time-intensive operations where reliability and resumability are paramount.
+Authors@R: 
+    person("Zaoqu", "Liu", email = "liuzaoqu@163.com", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0002-0452-742X"))
+Description: Provides drop-in replacements for 'purrr' and 'furrr' mapping 
+    functions with built-in fault tolerance, automatic checkpointing, and 
+    seamless recovery capabilities. When long-running computations are 
+    interrupted due to errors, system crashes, or other failures, simply 
+    re-run the same code to automatically resume from the last checkpoint. 
+    Ideal for large-scale data processing, API calls, web scraping, and 
+    other time-intensive operations where reliability is critical.
 License: MIT + file LICENSE
 Encoding: UTF-8
-LazyData: true
-RoxygenVersion: 7.3.2
-RoxygenNote: 7.3.2
+URL: https://github.com/Zaoqu-Liu/SafeMapper
+BugReports: https://github.com/Zaoqu-Liu/SafeMapper/issues
+RoxygenNote: 7.3.3
 Depends:
     R (>= 3.5.0)
 Imports:
     purrr (>= 0.3.0),
-    furrr (>= 0.2.0),
+    digest,
     tools
 Suggests:
-    testthat,
+    furrr (>= 0.2.0),
+    future,
+    testthat (>= 3.0.0),
+    knitr,
     rmarkdown
-URL: https://github.com/Zaoqu-Liu/SafeMapper
-BugReports: https://github.com/Zaoqu-Liu/SafeMapper/issues
+Config/testthat/edition: 3

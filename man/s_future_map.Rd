@@ -14,7 +14,7 @@ s_future_map(
   .x,
   .f,
   ...,
-  .options = furrr::furrr_options(),
+  .options = NULL,
   .env_globals = parent.frame(),
   .progress = FALSE,
   .id = NULL,
@@ -25,7 +25,7 @@ s_future_map_chr(
   .x,
   .f,
   ...,
-  .options = furrr::furrr_options(),
+  .options = NULL,
   .env_globals = parent.frame(),
   .progress = FALSE,
   .id = NULL,
@@ -36,7 +36,7 @@ s_future_map_dbl(
   .x,
   .f,
   ...,
-  .options = furrr::furrr_options(),
+  .options = NULL,
   .env_globals = parent.frame(),
   .progress = FALSE,
   .id = NULL,
@@ -47,7 +47,7 @@ s_future_map_int(
   .x,
   .f,
   ...,
-  .options = furrr::furrr_options(),
+  .options = NULL,
   .env_globals = parent.frame(),
   .progress = FALSE,
   .id = NULL,
@@ -58,7 +58,7 @@ s_future_map_lgl(
   .x,
   .f,
   ...,
-  .options = furrr::furrr_options(),
+  .options = NULL,
   .env_globals = parent.frame(),
   .progress = FALSE,
   .id = NULL,
@@ -69,7 +69,7 @@ s_future_map_dfr(
   .x,
   .f,
   ...,
-  .options = furrr::furrr_options(),
+  .options = NULL,
   .env_globals = parent.frame(),
   .progress = FALSE,
   .id = NULL,
@@ -80,7 +80,7 @@ s_future_map_dfc(
   .x,
   .f,
   ...,
-  .options = furrr::furrr_options(),
+  .options = NULL,
   .env_globals = parent.frame(),
   .progress = FALSE,
   .id = NULL,
@@ -94,13 +94,13 @@ s_future_map_dfc(
 
 \item{...}{Additional arguments passed to .f.}
 
-\item{.options}{A furrr_options object.}
+\item{.options}{A furrr_options object (NULL uses defaults).}
 
 \item{.env_globals}{The environment to look for globals.}
 
 \item{.progress}{A single logical.}
 
-\item{.id}{Optional name to use for ID column when row binding (dfr/dfc variants).}
+\item{.id}{Optional name for ID column (dfr/dfc variants).}
 
 \item{.session_id}{Character. Optional session ID.}
 }
@@ -108,7 +108,7 @@ s_future_map_dfc(
 A list.
 }
 \description{
-Safe Future Map - Parallel with Auto-Recovery
+Parallel mapping with automatic checkpointing. Requires the furrr package.
 }
 \examples{
 \dontrun{

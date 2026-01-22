@@ -14,16 +14,5 @@ List of results from the session, or NULL if session not found.
 }
 \description{
 Recovers and returns the results from a specific checkpoint session.
-This is useful for examining partial results or continuing computation
-after fixing errors.
 }
-\examples{
-# Recover a specific session
-results <- s_recover_session("map_20240101_120000_abcd1234")
-
-# Check if recovery was successful
-if (!is.null(results)) {
-  cat("Recovered", length(results), "items\n")
-}
-
-}
+\keyword{internal}

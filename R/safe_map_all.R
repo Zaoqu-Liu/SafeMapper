@@ -3,7 +3,7 @@
 # =============================================================================
 
 # Declare variables used in factory closures to avoid R CMD check NOTEs
-utils::globalVariables(c("transform_function", "bind_function"))
+utils::globalVariables(c("transform_fn", "bind_fn"))
 
 #' Create Safe Map Function Variant
 #'
@@ -12,9 +12,10 @@ utils::globalVariables(c("transform_function", "bind_function"))
 #' @keywords internal
 .create_safe_map <- function(mode, output_type = "list",
                              transform_fn = NULL, bind_fn = NULL) {
-  # Capture parameters in local variables for closure
-  transform_function <- transform_fn
-  bind_function <- bind_fn
+  force(mode)
+  force(output_type)
+  force(transform_fn)
+  force(bind_fn)
 
   function(.x, .f, ..., .id = NULL, .session_id = NULL) {
     result <- .safe_execute(
@@ -27,13 +28,13 @@ utils::globalVariables(c("transform_function", "bind_function"))
     )
 
     # Apply transformation if needed
-    if (!is.null(transform_function)) {
-      result <- transform_function(result)
+    if (!is.null(transform_fn)) {
+      result <- transform_fn(result)
     }
 
     # Apply binding if needed (for dfr/dfc)
-    if (!is.null(bind_function)) {
-      result <- bind_function(result, .id)
+    if (!is.null(bind_fn)) {
+      result <- bind_fn(result, .id)
     }
 
     result
@@ -44,9 +45,10 @@ utils::globalVariables(c("transform_function", "bind_function"))
 #' @keywords internal
 .create_safe_map2 <- function(mode, output_type = "list",
                               transform_fn = NULL, bind_fn = NULL) {
-  # Capture parameters in local variables for closure
-  transform_function <- transform_fn
-  bind_function <- bind_fn
+  force(mode)
+  force(output_type)
+  force(transform_fn)
+  force(bind_fn)
 
   function(.x, .y, .f, ..., .id = NULL, .session_id = NULL) {
     result <- .safe_execute(
@@ -58,12 +60,12 @@ utils::globalVariables(c("transform_function", "bind_function"))
       ...
     )
 
-    if (!is.null(transform_function)) {
-      result <- transform_function(result)
+    if (!is.null(transform_fn)) {
+      result <- transform_fn(result)
     }
 
-    if (!is.null(bind_function)) {
-      result <- bind_function(result, .id)
+    if (!is.null(bind_fn)) {
+      result <- bind_fn(result, .id)
     }
 
     result
@@ -74,13 +76,18 @@ utils::globalVariables(c("transform_function", "bind_function"))
 #' @keywords internal
 .create_safe_future_map <- function(mode, output_type = "list",
                                     transform_fn = NULL, bind_fn = NULL) {
-  # Capture parameters in local variables for closure
-  transform_function <- transform_fn
-  bind_function <- bind_fn
+  force(mode)
+  force(output_type)
+  force(transform_fn)
+  force(bind_fn)
 
-  function(.x, .f, ..., .options = furrr::furrr_options(),
+  function(.x, .f, ..., .options = NULL,
            .env_globals = parent.frame(), .progress = FALSE,
            .id = NULL, .session_id = NULL) {
+    .check_furrr()
+    
+    if (is.null(.options)) .options <- furrr::furrr_options()
+    
     result <- .safe_execute(
       data = list(.x),
       func = .f,
@@ -93,12 +100,12 @@ utils::globalVariables(c("transform_function", "bind_function"))
       ...
     )
 
-    if (!is.null(transform_function)) {
-      result <- transform_function(result)
+    if (!is.null(transform_fn)) {
+      result <- transform_fn(result)
     }
 
-    if (!is.null(bind_function)) {
-      result <- bind_function(result, .id)
+    if (!is.null(bind_fn)) {
+      result <- bind_fn(result, .id)
     }
 
     result
@@ -109,13 +116,18 @@ utils::globalVariables(c("transform_function", "bind_function"))
 #' @keywords internal
 .create_safe_future_map2 <- function(mode, output_type = "list",
                                      transform_fn = NULL, bind_fn = NULL) {
-  # Capture parameters in local variables for closure
-  transform_function <- transform_fn
-  bind_function <- bind_fn
+  force(mode)
+  force(output_type)
+  force(transform_fn)
+  force(bind_fn)
 
-  function(.x, .y, .f, ..., .options = furrr::furrr_options(),
+  function(.x, .y, .f, ..., .options = NULL,
            .env_globals = parent.frame(), .progress = FALSE,
            .id = NULL, .session_id = NULL) {
+    .check_furrr()
+    
+    if (is.null(.options)) .options <- furrr::furrr_options()
+    
     result <- .safe_execute(
       data = list(.x, .y),
       func = .f,
@@ -128,12 +140,12 @@ utils::globalVariables(c("transform_function", "bind_function"))
       ...
     )
 
-    if (!is.null(transform_function)) {
-      result <- transform_function(result)
+    if (!is.null(transform_fn)) {
+      result <- transform_fn(result)
     }
 
-    if (!is.null(bind_function)) {
-      result <- bind_function(result, .id)
+    if (!is.null(bind_fn)) {
+      result <- bind_fn(result, .id)
     }
 
     result
@@ -146,13 +158,23 @@ utils::globalVariables(c("transform_function", "bind_function"))
 
 #' Safe Map - Drop-in Replacement for purrr::map with Auto-Recovery
 #'
+#' Apply a function to each element of a list or vector with automatic
+#' checkpointing and recovery. If interrupted, simply run the same code
+#' again to resume from where it left off.
+#'
 #' @param .x A list or atomic vector to map over.
 #' @param .f A function, formula, or vector.
 #' @param ... Additional arguments passed to .f.
+#' @param .id Either a string or NULL (used for dfr/dfc variants).
 #' @param .session_id Character. Optional session ID for this operation.
+#'   If NULL (default), a session ID is automatically generated from the
+#'   input data, enabling seamless recovery without user intervention.
 #' @return A list, same as purrr::map.
+#'
 #' @examples
+#' # Basic usage - identical to purrr::map
 #' result <- s_map(1:10, ~ .x^2)
+#'
 #' @export
 s_map <- .create_safe_map("map", "list")
 
@@ -177,7 +199,6 @@ s_map_int <- .create_safe_map("map", "integer", transform_fn = as.integer)
 s_map_lgl <- .create_safe_map("map", "logical", transform_fn = as.logical)
 
 #' @rdname s_map
-#' @param .id Either a string or NULL for row binding.
 #' @return A data frame (row bind).
 #' @export
 s_map_dfr <- .create_safe_map("map", "list",
@@ -198,6 +219,7 @@ s_map_dfc <- .create_safe_map("map", "list", bind_fn = function(x, .id) purrr::l
 #' @param .x,.y Vectors of the same length.
 #' @param .f A function, formula, or vector.
 #' @param ... Additional arguments passed to .f.
+#' @param .id Either a string or NULL (used for dfr/dfc variants).
 #' @param .session_id Character. Optional session ID.
 #' @return A list.
 #' @examples
@@ -222,7 +244,6 @@ s_map2_int <- .create_safe_map2("map2", "integer", transform_fn = as.integer)
 s_map2_lgl <- .create_safe_map2("map2", "logical", transform_fn = as.logical)
 
 #' @rdname s_map2
-#' @param .id Either a string or NULL for row binding.
 #' @export
 s_map2_dfr <- .create_safe_map2("map2", "list",
   bind_fn = function(x, .id) purrr::list_rbind(x, names_to = .id)
@@ -240,13 +261,15 @@ s_map2_dfc <- .create_safe_map2("map2", "list",
 
 #' Safe Future Map - Parallel with Auto-Recovery
 #'
+#' Parallel mapping with automatic checkpointing. Requires the furrr package.
+#'
 #' @param .x A list or atomic vector.
 #' @param .f A function, formula, or vector.
 #' @param ... Additional arguments passed to .f.
-#' @param .options A furrr_options object.
+#' @param .options A furrr_options object (NULL uses defaults).
 #' @param .env_globals The environment to look for globals.
 #' @param .progress A single logical.
-#' @param .id Optional name to use for ID column when row binding (dfr/dfc variants).
+#' @param .id Optional name for ID column (dfr/dfc variants).
 #' @param .session_id Character. Optional session ID.
 #' @return A list.
 #' @examples
@@ -306,7 +329,7 @@ s_future_map_dfc <- .create_safe_future_map("future_map", "list",
 #' @param .options A furrr_options object.
 #' @param .env_globals The environment to look for globals.
 #' @param .progress A single logical.
-#' @param .id Optional name to use for ID column when row binding (dfr/dfc variants).
+#' @param .id Optional name for ID column (dfr/dfc variants).
 #' @param .session_id Character. Optional session ID.
 #' @return A list.
 #' @export

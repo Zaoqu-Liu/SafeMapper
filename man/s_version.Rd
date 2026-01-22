@@ -2,16 +2,11 @@
 % Please edit documentation in R/debugging.R
 \name{s_version}
 \alias{s_version}
-\title{Get SafeMapper Package Version and Information}
+\title{Get SafeMapper Package Information}
 \usage{
 s_version()
 }
 \description{
-Displays comprehensive information about the SafeMapper package including
-version, supported functions, and usage tips.
+Displays package version and basic information.
 }
-\examples{
-# Show package information
-s_version()
-
-}
+\keyword{internal}

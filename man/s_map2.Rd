@@ -31,7 +31,7 @@ s_map2_dfc(.x, .y, .f, ..., .id = NULL, .session_id = NULL)
 
 \item{...}{Additional arguments passed to .f.}
 
-\item{.id}{Either a string or NULL for row binding.}
+\item{.id}{Either a string or NULL (used for dfr/dfc variants).}
 
 \item{.session_id}{Character. Optional session ID.}
 }

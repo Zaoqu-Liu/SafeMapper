@@ -10,14 +10,6 @@ s_session_stats()
 Invisible data frame of session information.
 }
 \description{
-Provides summary statistics of all sessions including counts by status,
-overall completion rates, and timing information.
+Provides summary statistics of all checkpoint sessions.
 }
-\examples{
-# Show session statistics
-s_session_stats()
-
-# Capture statistics for further analysis
-stats <- s_session_stats()
-
-}
+\keyword{internal}

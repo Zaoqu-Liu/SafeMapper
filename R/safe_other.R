@@ -1,5 +1,5 @@
 # =============================================================================
-# Safe Other Functions - pmap, walk, imap (Simplified)
+# Safe Other Functions - pmap, walk, imap
 # =============================================================================
 
 # pmap Functions ------------------------------------------------------------
@@ -9,9 +9,6 @@
 #' @param .l A list of lists/vectors to map over.
 #' @param .f A function, formula, or vector.
 #' @param ... Additional arguments passed to .f.
-#' @param .options A furrr_options object (for s_future_pmap only).
-#' @param .env_globals The environment to look for globals (for s_future_pmap only).
-#' @param .progress A single logical for progress bar (for s_future_pmap only).
 #' @param .session_id Character. Optional session ID.
 #' @return A list.
 #' @export
@@ -26,13 +23,21 @@ s_pmap <- function(.l, .f, ..., .session_id = NULL) {
 }
 
 #' @rdname s_pmap
+#' @param .options A furrr_options object (NULL uses defaults).
+#' @param .env_globals The environment to look for globals.
+#' @param .progress A single logical for progress bar.
 #' @export
-s_future_pmap <- function(.l, .f, ..., .options = furrr::furrr_options(),
+s_future_pmap <- function(.l, .f, ..., .options = NULL,
                           .env_globals = parent.frame(), .progress = FALSE,
                           .session_id = NULL) {
+  .check_furrr()
+  
   if (!is.list(.l) || length(.l) == 0) {
     stop(".l must be a non-empty list", call. = FALSE)
   }
+  
+  if (is.null(.options)) .options <- furrr::furrr_options()
+  
   .safe_execute(
     data = .l, func = .f, session_id = .session_id,
     mode = "future_pmap", output_type = "list",
@@ -71,13 +76,17 @@ s_walk2 <- function(.x, .y, .f, ..., .session_id = NULL) {
 }
 
 #' @rdname s_walk
-#' @param .options A furrr_options object.
+#' @param .options A furrr_options object (NULL uses defaults).
 #' @param .env_globals The environment to look for globals.
 #' @param .progress A single logical.
 #' @export
-s_future_walk <- function(.x, .f, ..., .options = furrr::furrr_options(),
+s_future_walk <- function(.x, .f, ..., .options = NULL,
                           .env_globals = parent.frame(), .progress = FALSE,
                           .session_id = NULL) {
+  .check_furrr()
+  
+  if (is.null(.options)) .options <- furrr::furrr_options()
+  
   .safe_execute(
     data = list(.x), func = .f, session_id = .session_id,
     mode = "future_walk", output_type = "walk",
@@ -89,9 +98,13 @@ s_future_walk <- function(.x, .f, ..., .options = furrr::furrr_options(),
 
 #' @rdname s_walk
 #' @export
-s_future_walk2 <- function(.x, .y, .f, ..., .options = furrr::furrr_options(),
+s_future_walk2 <- function(.x, .y, .f, ..., .options = NULL,
                            .env_globals = parent.frame(), .progress = FALSE,
                            .session_id = NULL) {
+  .check_furrr()
+  
+  if (is.null(.options)) .options <- furrr::furrr_options()
+  
   .safe_execute(
     data = list(.x, .y), func = .f, session_id = .session_id,
     mode = "future_walk2", output_type = "walk",
@@ -130,13 +143,17 @@ s_imap_chr <- function(.x, .f, ..., .session_id = NULL) {
 }
 
 #' @rdname s_imap
-#' @param .options A furrr_options object.
+#' @param .options A furrr_options object (NULL uses defaults).
 #' @param .env_globals The environment to look for globals.
 #' @param .progress A single logical.
 #' @export
-s_future_imap <- function(.x, .f, ..., .options = furrr::furrr_options(),
+s_future_imap <- function(.x, .f, ..., .options = NULL,
                           .env_globals = parent.frame(), .progress = FALSE,
                           .session_id = NULL) {
+  .check_furrr()
+  
+  if (is.null(.options)) .options <- furrr::furrr_options()
+  
   .safe_execute(
     data = list(.x), func = .f, session_id = .session_id,
     mode = "future_imap", output_type = "list",

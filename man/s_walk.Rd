@@ -15,7 +15,7 @@ s_future_walk(
   .x,
   .f,
   ...,
-  .options = furrr::furrr_options(),
+  .options = NULL,
   .env_globals = parent.frame(),
   .progress = FALSE,
   .session_id = NULL
@@ -26,7 +26,7 @@ s_future_walk2(
   .y,
   .f,
   ...,
-  .options = furrr::furrr_options(),
+  .options = NULL,
   .env_globals = parent.frame(),
   .progress = FALSE,
   .session_id = NULL
@@ -43,7 +43,7 @@ s_future_walk2(
 
 \item{.y}{A list or atomic vector (same length as .x).}
 
-\item{.options}{A furrr_options object.}
+\item{.options}{A furrr_options object (NULL uses defaults).}
 
 \item{.env_globals}{The environment to look for globals.}
 
